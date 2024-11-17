@@ -43,59 +43,58 @@ var tcpServer = net.createServer((client) => {
     });
 
     client.on('data', async (data) => {
-        try {
-            gt06.parse(data);
-        } catch (e) {
-            console.log('err', e);
-            return;
-        }
-        console.log(gt06);
-        if (gt06.expectsResponse) {
-            client.write(gt06.responseMsg);
-        }
-        gt06.msgBuffer.forEach(async (msg) => {
-            mqttClient.publish(rootTopic + '/' + gt06.imei + '/pos', JSON.stringify(msg));
-    
-            // Preparar los datos para enviar a la ruta /update-from-gps
-            if (gt06.event.string === 'location') {
-                const gpsTime = new Date(gt06.fixTime);
+    try {
+        gt06.parse(data);
+    } catch (e) {
+        console.log('err', e);
+        return;
+    }
+    console.log(gt06);
+    if (gt06.expectsResponse) {
+        client.write(gt06.responseMsg);
+    }
+    gt06.msgBuffer.forEach(async (msg) => {
+        mqttClient.publish(rootTopic + '/' + gt06.imei + '/pos', JSON.stringify(msg));
+
+        // Preparar los datos para enviar a la ruta /update-from-gps
+        if (gt06.event.string === 'location') {
+            const gpsTime = new Date(gt06.fixTime);
             
-                // Convertir a la hora local
-                const localTime = new Date(gpsTime.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-                
-                // Formatear la hora local en ISO 8601
-                const localTimeISO = localTime.toISOString();
-                const deviceData = {
-                    imei: gt06.imei,
-                    Lat: gt06.lat,
-                    Lon: gt06.lon,
-                    speed: gt06.speed,
-                    course: gt06.course,
-                    time: localTimeISO,
-                    ignition: gt06.terminalInfo ? Boolean(gt06.terminalInfo.ignition) : false,
-                    charging: gt06.terminalInfo ? Boolean(gt06.terminalInfo.charging) : false,
-                    gpsTracking: gt06.terminalInfo ? Boolean(gt06.terminalInfo.gpsTracking) : false,
-                    relayState: gt06.terminalInfo ? Boolean(gt06.terminalInfo.relayState) : false
-                };
+            // Convertir a la hora local
+            const localTime = new Date(gpsTime.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
             
-                console.log(
-                    gt06.terminalInfo ? gt06.terminalInfo.ignition : 'undefined',
-                    gt06.terminalInfo ? gt06.terminalInfo.charging : 'undefined',
-                    gt06.terminalInfo ? gt06.terminalInfo.gpsTracking : 'undefined',
-                    gt06.terminalInfo ? gt06.terminalInfo.relayState : 'undefined'
-                );
-            
-                // Enviar los datos a la ruta /update-from-gps
-                try {
-                    await axios.post(`http://3.12.147.103/devices/update-from-gps`, deviceData);
-                    console.log(`Datos enviados a /update-from-gps para IMEI: ${gt06.imei}`);
-                } catch (error) {
-                    console.error('Error al enviar los datos:', error);
-                }
+            // Formatear la hora local en ISO 8601
+            const localTimeISO = localTime.toISOString();
+
+            if (!gt06.imei) {
+                console.error('IMEI es nulo o indefinido');
+                return;
             }
-        });
-        gt06.clearMsgBuffer();
+
+            const deviceData = {
+                imei: gt06.imei,
+                Lat: gt06.lat,
+                Lon: gt06.lon,
+                speed: gt06.speed,
+                course: gt06.course,
+                time: localTimeISO,
+                ignition: gt06.terminalInfo ? Boolean(gt06.terminalInfo.ignition) : false,
+                charging: gt06.terminalInfo ? Boolean(gt06.terminalInfo.charging) : false,
+                gpsTracking: gt06.terminalInfo ? Boolean(gt06.terminalInfo.gpsTracking) : false,
+                relayState: gt06.terminalInfo ? Boolean(gt06.terminalInfo.relayState) : false
+            };
+
+            // Enviar los datos a la ruta /update-from-gps
+            try {
+                await axios.post(`http://3.12.147.103/devices/update-from-gps`, deviceData);
+                console.log(`Datos enviados a /update-from-gps para IMEI: ${gt06.imei}`);
+            } catch (error) {
+                console.error('Error al enviar los datos:', error);
+            }
+        }
     });
+    gt06.clearMsgBuffer();
+});
 }); 
 
 // Inicia el servidor TCP en el puerto especificado
