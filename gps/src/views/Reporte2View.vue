@@ -40,6 +40,20 @@
                 <h1><i class='bx bxs-report icoon'></i> Reporte del Dispositivo</h1>
             </div>
 
+            <div class="submenu">
+              <div class="select">
+                <input type="text" readonly :value="selectedDevice || 'Seleccione un dispositivo'"
+                  @click="toggleDeviceDropdown" />
+                <i class="arrow" @click="toggleDeviceDropdown">&#9660;</i>
+              </div>
+              <ul v-if="deviceDropdownOpen" class="dropdown-menu">
+                <li v-for="device in devices" :key="device" @click="selectDevice(device)">
+                  <i class='bx bxs-bus iconn'></i>
+                  <span>{{ device }}</span>
+                </li>
+              </ul>
+            </div>
+
             <div class="search-container">
                 <div class="group">
                     <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
@@ -92,11 +106,15 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import Swal from 'sweetalert2';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import imgPath from '../assets/LP.png'; // Importa la imagen aquí
 
 // Variables reactivas
+const devices = ref([]);
+const deviceDropdownOpen = ref(false);
+const selectedDevice = ref(null);
 const displayedText = ref("");
 const dropdownOpen = ref(false);
 const fullText = "Navify";
@@ -104,6 +122,27 @@ let currentIndex = 0;
 let isDeleting = false;
 let typingInterval;
 const isDownloading = ref(false);
+
+const cargarDispositivos = async () => {
+    try {
+        const response = await fetch('http://3.12.147.103/devices');
+        if (!response.ok) {
+            throw new Error('Error en la respuesta de la API');
+        }
+        const data = await response.json();
+        devices.value = data.map(device => device.deviceName);
+    } catch (error) {
+        console.error('Error al cargar dispositivos:', error);
+    }
+};
+
+const selectDevice = (device) => {
+    selectedDevice.value = device;
+    deviceDropdownOpen.value = false;
+};
+const toggleDeviceDropdown = () => {
+    deviceDropdownOpen.value = !deviceDropdownOpen.value;
+};
 
 // Datos de la tabla como un array
 const reportData = ref([
@@ -204,6 +243,7 @@ const typeEffect = () => {
 
 // Llama a la función en el ciclo de vida
 onMounted(() => {
+    cargarDispositivos();
     typeEffect();
 });
 
@@ -214,6 +254,85 @@ onUnmounted(() => {
 
 
 <style scoped>
+.submenu {
+    margin-top: 10px;
+    position: relative;
+}
+
+.select {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.select input {
+    width: 100%;
+    padding: 12px 15px;
+    padding-right: 30px;
+    border: 1px solid var(--text-colar);
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: var(--sidebar-color);
+    color: var(--text-colar);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.select input:hover {
+    border-color: var(--primary-color);
+}
+
+.select .arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-colar);
+    pointer-events: none;
+    transition: transform 0.3s ease;
+}
+
+.select:hover .arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--sidebar-color);
+    border: 2px solid var(--text-colar);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu li {
+    padding: 12px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-colar);
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu li:hover {
+    background-color: var(--primary-color-light);
+}
+
+.dropdown-menu .iconn {
+    margin-right: 15px;
+    font-size: 1.2em;
+    color: var(--text-colar);
+}
 .home {
     min-height: 160vh;
 }
