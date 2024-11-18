@@ -73,14 +73,12 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Placa</th>
                             <th>Notificación</th>
                             <th>Fecha</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(row, index) in filteredReportData" :key="index">
-                            <td>{{ row.placa }}</td>
                             <td>{{ row.notificacion }}</td>
                             <td>{{ row.fecha }}</td>
                         </tr>
@@ -147,8 +145,8 @@ const downloadReport = () => {
         doc.text("Reporte del dispositivo", 13, 27);
 
         // Encabezado de la tabla
-        const headers = [["Placa", "Notificación", "Fecha"]];
-        const data = filteredReportData.value.map(row => [row.placa, row.notificacion, row.fecha]);
+        const headers = [["Notificación", "Fecha"]];
+        const data = filteredReportData.value.map(row => [row.notificacion, row.fecha]);
 
         // Establecer el estilo del encabezado
         doc.autoTable({

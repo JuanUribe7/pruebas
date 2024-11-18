@@ -196,10 +196,10 @@ async function showDeviceOnMap(device) {
       <b>${device.deviceName}</b><br>
       Tiempo: ${fixTime}<br>
       Velocidad: ${speed} km/h <br>
-      Curso: ${course}<br>
+
       Encendido: ${ignition}<br>
       Cargando: ${charging}<br>
-      Señal: ${gpsTracking}<br>
+   
 
     `).openPopup();
 
