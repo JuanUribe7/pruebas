@@ -212,6 +212,7 @@ onUnmounted(() => {
 });
 </script>
 
+
 <style scoped>
 .home {
     min-height: 160vh;
