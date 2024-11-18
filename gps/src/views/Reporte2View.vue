@@ -40,6 +40,15 @@
                 <h1><i class='bx bxs-report icoon'></i> Reporte del Dispositivo</h1>
             </div>
 
+            <div class="group">
+    <label for="device-select">Seleccione un dispositivo:</label>
+    <select id="device-select" v-model="selectedDevice">
+        <option v-for="device in devices" :key="device._id" :value="device">
+            {{ device.deviceName }}
+        </option>
+    </select>
+</div>
+
             <div class="search-container">
                 <div class="group">
                     <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
@@ -95,6 +104,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import imgPath from '../assets/LP.png'; // Importa la imagen aquí
+import axios from 'axios';
 
 // Variables reactivas
 const displayedText = ref("");
@@ -104,6 +114,20 @@ let currentIndex = 0;
 let isDeleting = false;
 let typingInterval;
 const isDownloading = ref(false);
+
+const devices = ref([]);
+const selectedDevice = ref(null);
+
+const cargarDispositivos = async () => {
+    try {
+        const response = await axios.get('http://3.12.147.103/devices');
+        devices.value = response.data;
+    } catch (error) {
+        console.error('Error al cargar dispositivos:', error);
+    }
+};
+
+
 
 // Datos de la tabla como un array
 const reportData = ref([
@@ -205,6 +229,7 @@ const typeEffect = () => {
 // Llama a la función en el ciclo de vida
 onMounted(() => {
     typeEffect();
+    cargarDispositivos();
 });
 
 onUnmounted(() => {
@@ -482,4 +507,21 @@ onUnmounted(() => {
     justify-content: space-between;
     width: 94%;
 }
+
+
+.group {
+    display: flex;
+    justify-content: space-between;
+    width: 94%;
+}
+
+#device-select {
+    padding: 10px;
+    border: 1px solid var(--text-colar);
+    border-radius: 5px;
+    background-color: var(--sidebar-color);
+    color: var(--text-colar);
+    cursor: pointer;
+}
+
 </style>
