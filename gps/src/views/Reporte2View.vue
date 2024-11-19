@@ -84,10 +84,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(row, index) in filteredReportData" :key="index">
-                            <td>{{ row.notificacion }}</td>
-                            <td>{{ row.fecha }}</td>
-                        </tr>
+                        <tr v-for="alert in alerts" :key="alert._id">
+                        <td>{{ alert.alertName }}</td>
+                        <td>{{ new Date(alert.alertTime).toLocaleString() }}</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -101,6 +101,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Swal from 'sweetalert2';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import axios from 'axios'
 import imgPath from '../assets/LP.png'; // Importa la imagen aquí
 
 // Variables reactivas
@@ -114,6 +115,7 @@ let currentIndex = 0;
 let isDeleting = false;
 let typingInterval;
 const isDownloading = ref(false);
+const alerts = ref([]);
 
 const cargarDispositivos = async () => {
     try {
@@ -128,9 +130,10 @@ const cargarDispositivos = async () => {
     }
 };
 
-const selectDevice = (device) => {
+const selectDevice = async (device) => {
     selectedDevice.value = device;
     deviceDropdownOpen.value = false;
+    await cargarAlertas(device.imei);
 };
 const toggleDeviceDropdown = () => {
     deviceDropdownOpen.value = !deviceDropdownOpen.value;
@@ -231,6 +234,15 @@ const typeEffect = () => {
 
     const typingSpeed = isDeleting ? 100 : 200;
     typingInterval = setTimeout(typeEffect, typingSpeed);
+};
+
+const cargarAlertas = async (imei) => {
+    try {
+        const response = await axios.get(`http://3.12.147.103/alerts/${imei}`);
+        alerts.value = response.data;
+    } catch (error) {
+        console.error('Error al cargar alertas:', error);
+    }
 };
 
 // Llama a la función en el ciclo de vida

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
+const Alert = require('../models/Alert');
 const HistoryData = require('../models/HistoryData'); // Importa HistoryData desde HistoryData.js
 
 
@@ -178,6 +179,16 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar dispositivo:', error.message);
         res.status(500).json({ error: 'Error al eliminar dispositivo: ' + error.message });
+    }
+});
+
+router.get('/alerts/:imei', async (req, res) => {
+    try {
+        const { imei } = req.params;
+        const alertas = await Alert.find({ imei });
+        res.json(alertas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener alertas', error: error.message });
     }
 });
 
