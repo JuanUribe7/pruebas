@@ -42,7 +42,7 @@
 
             <div class="submenu">
               <div class="select">
-                <input type="text" readonly :value="selectedDevice || 'Seleccione un dispositivo'"
+                <input type="text" readonly :value="selectedDevice ? selectedDevice.deviceName : 'Seleccione un dispositivo'"
                   @click="toggleDeviceDropdown" />
                 <i class="arrow" @click="toggleDeviceDropdown">&#9660;</i>
               </div>
