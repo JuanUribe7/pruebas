@@ -49,7 +49,7 @@
               <ul v-if="deviceDropdownOpen" class="dropdown-menu">
                 <li v-for="device in devices" :key="device" @click="selectDevice(device)">
                   <i class='bx bxs-bus iconn'></i>
-                  <span>{{ device }}</span>
+                  <span>{{ device.deviceName }}</span>
                 </li>
               </ul>
             </div>
