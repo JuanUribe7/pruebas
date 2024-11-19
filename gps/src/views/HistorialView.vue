@@ -95,7 +95,7 @@ import 'leaflet/dist/leaflet.css';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
-
+import axios from 'axios';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl,
@@ -189,7 +189,8 @@ const showAlert = (item) => {
       if (!startDate || !endDate) {
         Swal.showValidationMessage('Por favor ingrese todas las fechas');
       }
-      return { startDate, endDate };
+      return {  startDate: new Date(startDate).toISOString(),
+        endDate: new Date(endDate).toISOString()};
     }
   }).then((result) => {
     if (result.isConfirmed) {
@@ -211,15 +212,24 @@ const showHistory = async (device, startDate, endDate) => {
   }
 
   try {
-    const coordenadasManuales = [
-      [10.9685, -74.7813],
-      [10.9700, -74.7800],
-      [10.9720, -74.7790],
-      [10.9740, -74.7785],
-      [10.9760, -74.7780],
-    ];
+    const response = await axios.get(`http://3.12.147.103/devices/history/${device.imei}`, {
+      params: {
+        startDate,
+        endDate
+      }
+    });
+    const historyData = response.data;
+   console.log('Datos de historial recibidos:', historyData);
 
-    const coordenadas = coordenadasManuales;
+    if (!Array.isArray(historyData)) {
+      throw new Error('La respuesta del servidor no es un array.');
+    }
+
+    if (!historyData.length) {
+      throw new Error('No se encontraron datos de historial para este IMEI.');
+    }
+
+    const coordenadas = historyData.map(point => [point.lat, point.lon]);
 
     if (polyline) {
       map.removeLayer(polyline);
@@ -227,7 +237,7 @@ const showHistory = async (device, startDate, endDate) => {
 
     polyline = L.polyline(coordenadas, { color: 'red' }).addTo(map);
 
-    if (marker) { 
+    if (marker) {
       map.removeLayer(marker);
     }
     marker = L.marker(coordenadas[0]).addTo(map).bindPopup('Inicio');
@@ -240,7 +250,7 @@ const showHistory = async (device, startDate, endDate) => {
     console.error('Error al mostrar el historial:', error);
     Swal.fire({
       title: 'Error',
-      text: 'No se pudo mostrar el historial del dispositivo.',
+      text: `No se pudo mostrar el historial del dispositivo. Detalles: ${error.message}`,
       icon: 'error',
       confirmButtonText: 'Entendido'
     });

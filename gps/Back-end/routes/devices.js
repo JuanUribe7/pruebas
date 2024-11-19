@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { Device, DeviceStatus } = require('../models/Device'); // Asegúrate de importar DeviceStatus
+const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
+const HistoryData = require('../models/HistoryData'); // Importa HistoryData desde HistoryData.js
+
 
 // Endpoint para obtener todos los dispositivos
 router.get('/', async (req, res) => {
@@ -21,6 +23,10 @@ router.post('/save-history', async (req, res) => {
         if (!imei || lat === undefined || lon === undefined) {
             return res.status(400).json({ error: 'IMEI, latitud y longitud son obligatorios.' });
         }
+        const dispositivo = await Device.findOne({ imei });
+        if (!dispositivo) {
+            return res.status(404).json({ message: 'Dispositivo no encontrado' });
+        }
 
         // Crear un nuevo registro de historial
         const historyData = new HistoryData({
@@ -37,12 +43,14 @@ router.post('/save-history', async (req, res) => {
         res.status(201).json({ message: 'Datos históricos guardados exitosamente.' });
     } catch (error) {
         console.error('Error al guardar datos históricos:', error);
-        res.status(500).json({ error: 'Error interno del servidor.' });
-    }});
+        res.status(500).json({ error: 'Error interno del servidor.', details: error.message });
+    }
+});
+
 // Endpoint para actualizar la ubicación del dispositivo desde el GPS
 router.post('/update-from-gps', async (req, res) => {
     try {
-        const { imei, Lat, Lon, speed, course, time, ignition, charging, gpsTracking, relayState  } = req.body;
+        const { imei, Lat, Lon, speed, course, time, ignition, charging, gpsTracking, relayState } = req.body;
 
         // Verificar que todos los datos requeridos estén presentes
         if (!imei || Lat === undefined || Lon === undefined) {
@@ -130,7 +138,8 @@ router.put('/:id', async (req, res) => {
         res.status(500).json({ error: 'Error al actualizar dispositivo: ' + error.message });
     }
 });
-// En devices.js
+
+// Endpoint para obtener el estado de un dispositivo por IMEI
 router.get('/status/:imei', async (req, res) => {
     try {
         const { imei } = req.params;
@@ -142,6 +151,17 @@ router.get('/status/:imei', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener el estado del dispositivo:', error.message);
         res.status(500).json({ error: 'Error al obtener el estado del dispositivo: ' + error.message });
+    }
+});
+
+router.get('/history/:imei', async (req, res) => {
+    try {
+        const { imei } = req.params;
+        const historyData = await HistoryData.find({ imei }).sort({ fixTime: 1 });
+        res.json(historyData);
+    } catch (error) {
+        console.error('Error al obtener el historial:', error.message);
+        res.status(500).json({ error: 'Error al obtener el historial: ' + error.message });
     }
 });
 
