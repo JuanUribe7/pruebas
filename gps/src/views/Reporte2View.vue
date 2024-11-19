@@ -239,7 +239,9 @@ const typeEffect = () => {
 const cargarAlertas = async (imei) => {
     try {
         const response = await axios.get(`http://3.12.147.103/alerts/${imei}`);
-        alerts.value = response.data;
+        const data = await response.json();
+
+        alerts.value = data
     } catch (error) {
         console.error('Error al cargar alertas:', error);
     }
