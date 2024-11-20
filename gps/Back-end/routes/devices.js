@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
-const alerts = require('../models/alerts');
+const Alert = require('../models/Alert'); 
 const HistoryData = require('../models/HistoryData'); // Importa HistoryData desde HistoryData.js
 
 
@@ -185,11 +185,12 @@ router.delete('/:id', async (req, res) => {
 router.get('/alerts/:imei', async (req, res) => {
     try {
         const { imei } = req.params;
-        const alertas = await alerts.find({ imei });
+        const alertas = await Alert.find({ imei });
         res.json(alertas);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener alertas', error: error.message });
     }
 });
+
 
 module.exports = router;
