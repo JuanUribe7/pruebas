@@ -253,9 +253,10 @@ const cargarAlertas = async (imei) => {
         return;
     }
     try {
-        const response = await axios.get(`http://3.12.147.103/alerts/${imei}`);
-        console.log(response.data); // Verifica los datos recibidos
-        alerts.value = response.data;
+        const response = await fetch(`http://3.12.147.103/alerts/${imei}`);
+        const data = await response.json();
+        console.log(data); // Verifica los datos recibidos
+        alerts.value = data;
     } catch (error) {
         console.error('Error al cargar alertas:', error);
         alerts.value = [];
