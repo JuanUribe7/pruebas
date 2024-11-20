@@ -81,6 +81,22 @@ router.post('/update-from-gps', async (req, res) => {
             },
             { upsert: true, new: true }
         );
+        console.log(`Velocidad actual: ${speed} km/h`);
+        if (speed > 2) {
+            console.log(`Velocidad de ${speed} km/h detectada, creando alerta...`);
+            const alert = new Alert({
+                imei: imei,
+                alertName: 'exceso de velocidad',
+                alertTime: time
+            });
+
+            try {
+                await alert.save();
+                console.log(`Alerta de exceso de velocidad guardada para IMEI: ${imei}`);
+            } catch (error) {
+                console.error('Error al guardar la alerta:', error);
+            }
+        }
 
         console.log(`Ubicación actualizada para IMEI: ${imei} - Latitud: ${Lat}, Longitud: ${Lon}`);
         res.json({ message: 'Ubicación actualizada exitosamente' });

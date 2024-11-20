@@ -106,22 +106,7 @@ var tcpServer = net.createServer((client) => {
                 } catch (error) {
                     console.error('Error al enviar los datos:', error);
                 }
-                console.log(`Velocidad actual: ${gt06.speed} km/h`);
-                if (gt06.speed > 2) {
-                    console.log(`Velocidad de ${gt06.speed} km/h detectada, creando alerta...`);
-                    const alert = new Alert({
-                        imei: gt06.imei,
-                        alertName: 'exceso de velocidad',
-                        alertTime: localTimeISO
-                    });
-    
-                    try {
-                        await alert.save();
-                        console.log(`Alerta de exceso de velocidad guardada para IMEI: ${gt06.imei}`);
-                    } catch (error) {
-                        console.error('Error al guardar la alerta:', error);
-                    }
-                }
+              
             }
         });
         gt06.clearMsgBuffer();
