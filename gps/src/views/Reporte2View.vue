@@ -135,6 +135,8 @@ const selectDevice = async (device) => {
     deviceDropdownOpen.value = false;
     await cargarAlertas(device.imei);
 };
+
+
 const toggleDeviceDropdown = () => {
     deviceDropdownOpen.value = !deviceDropdownOpen.value;
 };
@@ -239,9 +241,8 @@ const typeEffect = () => {
 const cargarAlertas = async (imei) => {
     try {
         const response = await axios.get(`http://3.12.147.103/alerts/${imei}`);
-        const data = await response.json();
-
-        alerts.value = data
+        console.log(response.data); // Verifica los datos recibidos
+        alerts.value = response.data;
     } catch (error) {
         console.error('Error al cargar alertas:', error);
     }
