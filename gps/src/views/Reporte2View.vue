@@ -254,6 +254,11 @@ const cargarAlertas = async (imei) => {
     }
     try {
         const response = await fetch(`http://3.12.147.103/alerts/${imei}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error del servidor:', errorText);
+            return;
+        }
         const data = await response.json();
         console.log(data); // Verifica los datos recibidos
         alerts.value = data;
@@ -262,6 +267,7 @@ const cargarAlertas = async (imei) => {
         alerts.value = [];
     }
 };
+
 
 // Llama a la función en el ciclo de vida
 onMounted(() => {
