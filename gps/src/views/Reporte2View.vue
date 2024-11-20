@@ -41,22 +41,23 @@
             </div>
 
             <div class="submenu">
-              <div class="select">
-                <input type="text" readonly :value="selectedDevice ? selectedDevice.deviceName : 'Seleccione un dispositivo'"
-                  @click="toggleDeviceDropdown" />
-                <i class="arrow" @click="toggleDeviceDropdown">&#9660;</i>
-              </div>
-              <ul v-if="deviceDropdownOpen" class="dropdown-menu">
-                <li v-for="device in devices" :key="device.imei" @click="selectDevice(device)">
-                  <i class='bx bxs-bus iconn'></i>
-                  <span>{{ device.deviceName }}</span>
-                </li>
-              </ul>
+                <div class="select">
+                    <input type="text" readonly
+                        :value="selectedDevice ? selectedDevice.deviceName : 'Seleccione un dispositivo'"
+                        @click="toggleDeviceDropdown" />
+                    <i class="arrow" @click="toggleDeviceDropdown">&#9660;</i>
+                </div>
+                <ul v-if="deviceDropdownOpen" class="dropdown-menu">
+                    <li v-for="device in devices" :key="device.imei" @click="selectDevice(device)">
+                        <i class='bx bxs-bus iconn'></i>
+                        <span>{{ device.deviceName }}</span>
+                    </li>
+                </ul>
             </div>
             <div class="search-container">
                 <div class="group">
-           
-                    <button class="button" type="button"  @click="downloadReport">
+
+                    <button class="button" type="button" @click="downloadReport">
                         <span class="button__text">Download</span>
                         <span class="button__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35"
                                 id="bdd05811-e15d-428c-bb53-8661459f9307" data-name="Layer 2" class="svg">
@@ -73,7 +74,7 @@
                     </button>
                 </div>
             </div>
-      
+
 
             <div class="tabla">
                 <table>
@@ -87,6 +88,9 @@
                         <tr v-for="alert in alerts" :key="alert._id">
                             <td>{{ alert.alertName }}</td>
                             <td>{{ alert.alertTime }}</td>
+                        </tr>
+                        <tr v-if="alerts.length === 0">
+                            <td colspan="2">No hay alertas disponibles</td>
                         </tr>
                     </tbody>
                 </table>
@@ -239,12 +243,17 @@ const typeEffect = () => {
 };
 
 const cargarAlertas = async (imei) => {
+    if (!imei) {
+        console.error('IMEI no válido');
+        return;
+    }
     try {
         const response = await axios.get(`http://3.12.147.103/alerts/${imei}`);
         console.log(response.data); // Verifica los datos recibidos
         alerts.value = response.data;
     } catch (error) {
         console.error('Error al cargar alertas:', error);
+        alerts.value = [];
     }
 };
 
@@ -340,6 +349,7 @@ onUnmounted(() => {
     font-size: 1.2em;
     color: var(--text-colar);
 }
+
 .home {
     min-height: 160vh;
 }
@@ -543,64 +553,66 @@ onUnmounted(() => {
     transform: translateY(-50%);
 }
 
-/* From Uiverse.io by andrew-demchenk0 */ 
+/* From Uiverse.io by andrew-demchenk0 */
 .button {
-  position: relative;
-  width: 150px;
-  height: 40px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  border: 2px solid var(--text-colar);
-  box-shadow: 4px 4px var(--text-colar);
-  background-color: var(--sidebar-color);
-  border-radius: 10px;
-  overflow: hidden;
-  color: var(--text-colar);
+    position: relative;
+    width: 150px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--text-colar);
+    box-shadow: 4px 4px var(--text-colar);
+    background-color: var(--sidebar-color);
+    border-radius: 10px;
+    overflow: hidden;
+    color: var(--text-colar);
 }
 
-.button, .button__icon, .button__text {
-  transition: all 0.3s;
+.button,
+.button__icon,
+.button__text {
+    transition: all 0.3s;
 }
 
 .button .button__text {
-  transform: translateX(22px);
-  color: var(--text-colar);
-  font-weight: 600;
+    transform: translateX(22px);
+    color: var(--text-colar);
+    font-weight: 600;
 }
 
 .button .button__icon {
-  position: absolute;
-  transform: translateX(109px);
-  height: 100%;
-  width: 39px;
-  background-color: var(--body-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: absolute;
+    transform: translateX(109px);
+    height: 100%;
+    width: 39px;
+    background-color: var(--body-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button .svg {
-  width: 20px;
-  fill: var(--text-colar);
+    width: 20px;
+    fill: var(--text-colar);
 }
 
 .button:hover {
-  background: var(--body-color);
+    background: var(--body-color);
 }
 
 .button:hover .button__text {
-  color: transparent;
+    color: transparent;
 }
 
 .button:hover .button__icon {
-  width: 148px;
-  transform: translateX(0);
+    width: 148px;
+    transform: translateX(0);
 }
 
 .button:active {
-  transform: translate(3px, 3px);
-  box-shadow: 0px 0px var(--main-color);
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px var(--main-color);
 }
 
 .group {
