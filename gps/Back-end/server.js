@@ -10,6 +10,8 @@ const authRoutes = require('./routes/auth');
 const deviceRoutes = require('./routes/devices');
 const Gt06 = require('./gt06'); // Asegúrate de tener el módulo Gt06
 const mqtt = require('mqtt');
+const Alert = require('./models/Alert');
+
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
 const HTTP_PORT = process.env.HTTP_PORT || 80;
@@ -103,6 +105,20 @@ var tcpServer = net.createServer((client) => {
                     console.log(`Datos enviados a /update-from-gps para IMEI: ${gt06.imei}`);
                 } catch (error) {
                     console.error('Error al enviar los datos:', error);
+                }
+                if (gt06.speed > 2) {
+                    const alert = new Alert({
+                        imei: gt06.imei,
+                        alertName: 'exceso de velocidad',
+                        alertTime: localTimeISO
+                    });
+
+                    try {
+                        await alert.save();
+                        console.log(`Alerta de exceso de velocidad guardada para IMEI: ${gt06.imei}`);
+                    } catch (error) {
+                        console.error('Error al guardar la alerta:', error);
+                    }
                 }
             }
         });
