@@ -3,6 +3,7 @@ const router = express.Router();
 const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
 const Alert = require('../models/Alert'); 
 const HistoryData = require('../models/HistoryData'); // Importa HistoryData desde HistoryData.js
+const formatearFecha = require('../utils/expresiones')
 
 
 // Endpoint para obtener todos los dispositivos
@@ -50,6 +51,7 @@ router.post('/save-history', async (req, res) => {
 
 // Endpoint para actualizar la ubicación del dispositivo desde el GPS
 router.post('/update-from-gps', async (req, res) => {
+    
     try {
         const { imei, Lat, Lon, speed, course, time, ignition, charging, gpsTracking, relayState } = req.body;
 
@@ -86,8 +88,8 @@ router.post('/update-from-gps', async (req, res) => {
             console.log(`Velocidad de ${speed} km/h detectada, creando alerta...`);
             const alert = new Alert({
                 imei: imei,
-                alertName: 'exceso de velocidad',
-                alertTime: time
+                alertName: `Exceso de velocidad: ${speed} km/h`,
+                alertTime: formatearFecha(time)
             });
 
             try {
