@@ -253,7 +253,7 @@ const cargarAlertas = async (imei) => {
         return;
     }
     try {
-        const response = await fetch(`http://3.12.147.103/alerts/${imei}`);
+        const response = await fetch(`http://3.12.147.103/devices/alerts/${imei}`);
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error del servidor:', errorText);
