@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
-const alerts = require('../models/Alert');
+const alerts = require('../models/alerts');
 const HistoryData = require('../models/HistoryData'); // Importa HistoryData desde HistoryData.js
 
 
