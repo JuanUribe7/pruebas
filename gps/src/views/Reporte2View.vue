@@ -135,9 +135,14 @@ const cargarDispositivos = async () => {
 };
 
 const selectDevice = async (device) => {
+    console.log('Dispositivo seleccionado:', device); // Verifica el dispositivo seleccionado
+    if (!device.imei) {
+        console.error('IMEI del dispositivo no disponible');
+        return;
+    }
     selectedDevice.value = device;
     deviceDropdownOpen.value = false;
-    await cargarAlertas(device.imei);
+    await cargarAlertas(device.imei); // Llamada para cargar alertas
 };
 
 
