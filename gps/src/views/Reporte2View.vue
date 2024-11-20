@@ -47,9 +47,9 @@
                 <i class="arrow" @click="toggleDeviceDropdown">&#9660;</i>
               </div>
               <ul v-if="deviceDropdownOpen" class="dropdown-menu">
-                <li v-for="alert in alerts" :key="alert.imei" @click="selectDevice(alert)">
+                <li v-for="device in devices" :key="device.imei" @click="selectDevice(device)">
                   <i class='bx bxs-bus iconn'></i>
-                  <span>{{ alert.deviceName }}</span>
+                  <span>{{ device.deviceName }}</span>
                 </li>
               </ul>
             </div>
@@ -86,7 +86,7 @@
                     <tbody>
                         <tr v-for="alert in alerts" :key="alert._id">
                             <td>{{ alert.alertName }}</td>
-                            <td>{{ new Date(alert.alertTime).toLocaleString() }}</td>
+                            <td>{{ alert.alertTime }}</td>
                         </tr>
                     </tbody>
                 </table>
