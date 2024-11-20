@@ -71,7 +71,7 @@ router.post('/update-from-gps', async (req, res) => {
             { imei },
             {
                 imei,
-                fixTime: time,
+                fixTime: formatearFecha(time),
                 lat: Lat,
                 lon: Lon,
                 speed,
