@@ -10,7 +10,7 @@ const authRoutes = require('./routes/auth');
 const deviceRoutes = require('./routes/devices');
 const Gt06 = require('./gt06'); // Asegúrate de tener el módulo Gt06
 const mqtt = require('mqtt');
-const Alert = require('./models/Alert');
+
 
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
