@@ -151,8 +151,16 @@ const server = app.listen(HTTP_PORT, () => {
 // Configuración del servidor WebSocket
 const wss = new WebSocketServer({ server });
 
-wss.on('connection', (ws) => {
+wss.on('connection', async (ws) => {
     console.log('Cliente WebSocket conectado');
+
+    // Consultar la base de datos y enviar las notificaciones al cliente
+    try {
+        const notificaciones = await Notification.find();
+        ws.send(JSON.stringify(notificaciones));
+    } catch (error) {
+        console.error('Error al obtener notificaciones:', error);
+    }
 
     ws.on('message', (message) => {
         console.log('Mensaje recibido:', message);
