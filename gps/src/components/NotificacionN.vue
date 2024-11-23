@@ -11,15 +11,15 @@
                 </path>
             </svg>
             <ul>
-                <li><router-link to="#"><i class='bx bxs-message-alt-x'></i> Limpiar</router-link></li>
+                <li @click="clearNotifications"><i class='bx bxs-message-alt-x'></i> Limpiar</li>
                 <li><router-link to="/reporte2"><i class='bx bxs-book-open'></i> Abrir Notificación</router-link></li>
             </ul>
         </div>
 
         <div>
             <ul class="notification-list">
-                <li v-for="(notification, index) in notifications.slice(0, 7)" :key="index">
-                    <router-link to="#"> {{ notification }}</router-link>
+                <li v-for="alert in alerts" :key="alert._id">
+                    <router-link to="#"> {{ alert.alertName }}</router-link>
                 </li>
             </ul>
         </div>
@@ -28,14 +28,52 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import iziToast from 'izitoast';
 
+const alerts = ref([]);
 const showMenu = ref(false);
-const notifications = ref(['Notificación 1', 'Notificación 2', 'Notificación 3', 'Notificación 4', 'Notificación 4', 'Notificación 4', 'Notificación 4']); // Ejemplo de notificaciones
 
 const toggleMenu = () => {
     showMenu.value = !showMenu.value;
 };
+
+const cargarAlertas = async () => {
+    try {
+        // Hacer la solicitud para obtener alertas por IMEI
+        const response = await fetch(`http://3.12.147.103/devices/alerts`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error del servidor:', errorText);
+            return;
+        }
+        const data = await response.json();
+        console.log(data); // Verifica los datos recibidos
+        alerts.value = data;
+
+        // Mostrar alerta si hay una alerta en la respuesta
+        if (data.alert) {
+            iziToast.warning({
+                title: 'Alerta',
+                message: data.alert.alertName,
+                position: 'topRight',
+                timeout: 5000 // Mostrar la alerta durante 5 segundos
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar alertas:', error);
+        alerts.value = [];
+    }
+};
+
+const clearNotifications = () => {
+    alerts.value = [];
+};
+
+// Llama a la función cargarAlertas cuando el componente se monta
+onMounted(() => {
+    cargarAlertas();
+});
 </script>
 
 <style scoped>
@@ -139,6 +177,6 @@ const toggleMenu = () => {
 }
 .notification-list li a {
     text-decoration: none;
-    color: transparent;
+    color: var(--text-color);
 }
 </style>

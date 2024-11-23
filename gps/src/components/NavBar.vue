@@ -6,7 +6,7 @@
 
         <div class="actions">
             <!-- Icono de notificación con indicador -->
-            <router-link to="#"  @click.prevent="toggleNotificationModal">
+            <router-link to="#"  @click.prevent="toggleNotificationModal" >
                 <button class="notification-btn">
                     <i class='bx bx-bell'></i>
                     <span class="notification-indicator"></span>

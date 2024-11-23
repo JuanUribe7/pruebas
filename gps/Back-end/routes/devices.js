@@ -212,4 +212,13 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.get('/alerts/', async (req, res) => {
+    try {
+        const alertas = await Alert.find();
+        res.json(alertas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener alertas', error: error.message });
+    }
+});
+
 module.exports = router;
