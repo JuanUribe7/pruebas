@@ -159,42 +159,21 @@ const server = app.listen(HTTP_PORT, () => {
 // Configuración del servidor WebSocket
 const wss = new WebSocketServer({ server });
 
-wss.on('connection', async (ws) => {
+wss.on('connection', (ws) => {
     console.log('Cliente WebSocket conectado');
 
-    // Función para consultar la base de datos y enviar las notificaciones al cliente
-    const enviarNotificacion = async (notificacion) => {
-        wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(notificacion));
-            }
-        });
-    };
-
-    // Enviar notificaciones inmediatamente al conectar
-    enviarNotificacion();
-
-    // Configurar un intervalo para enviar notificaciones periódicamente
-    const intervalId = setInterval(enviarNotificacion, 3000); // Cada 60 segundos
-
+    // Puedes manejar mensajes del cliente si es necesario
     ws.on('message', (message) => {
         console.log('Mensaje recibido:', message);
     });
 
     ws.on('close', () => {
         console.log('Cliente WebSocket desconectado');
-        clearInterval(intervalId); // Limpiar el intervalo cuando el cliente se desconecta
     });
 });
 
 // Función para enviar notificaciones a todos los clientes WebSocket conectados
-const enviarNotificacion = (notificacion) => {
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(notificacion));
-        }
-    });
-};
+
+
 
 // Exportar la función para que pueda ser utilizada en otros módulos
-module.exports = { enviarNotificacion };

@@ -1,14 +1,13 @@
 const Notification = require('../models/notification'); // Modelo Mongoose
-const { enviarNotificacion } = require('../server'); // Importar la función para enviar notificaciones
+const { enviarNotificacion } = require('./websocketUtils'); // Importamos la función de envío de notificaciones
 
-// Escuchar cambios en la colección Notification
-const iniciarWatcher = () => {
+const iniciarWatcher = (wss) => { // Recibe la instancia de WebSocket Server
     const changeStream = Notification.watch();
 
     changeStream.on('change', async (change) => {
         if (change.operationType === 'insert') {
             const newNotification = change.fullDocument;
-            enviarNotificacion(newNotification);
+            enviarNotificacion(newNotification, wss); // Pasamos wss al enviarNotificacion
         }
     });
 
