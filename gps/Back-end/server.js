@@ -155,13 +155,21 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', async (ws) => {
     console.log('Cliente WebSocket conectado');
 
-    // Consultar la base de datos y enviar las notificaciones al cliente
-    try {
-        const notificaciones = await Notification.find();
-        ws.send(JSON.stringify(notificaciones));
-    } catch (error) {
-        console.error('Error al obtener notificaciones:', error);
-    }
+    // Función para consultar la base de datos y enviar las notificaciones al cliente
+    const enviarNotificaciones = async () => {
+        try {
+            const notificaciones = await Notification.find();
+            ws.send(JSON.stringify(notificaciones));
+        } catch (error) {
+            console.error('Error al obtener notificaciones:', error);
+        }
+    };
+
+    // Enviar notificaciones inmediatamente al conectar
+    enviarNotificaciones();
+
+    // Configurar un intervalo para enviar notificaciones periódicamente
+    const intervalId = setInterval(enviarNotificaciones, 60000); // Cada 60 segundos
 
     ws.on('message', (message) => {
         console.log('Mensaje recibido:', message);
@@ -169,6 +177,7 @@ wss.on('connection', async (ws) => {
 
     ws.on('close', () => {
         console.log('Cliente WebSocket desconectado');
+        clearInterval(intervalId); // Limpiar el intervalo cuando el cliente se desconecta
     });
 });
 

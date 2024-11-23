@@ -38,52 +38,7 @@ const toggleMenu = () => {
     showMenu.value = !showMenu.value;
 };
 
-const cargarAlertas = async () => {
-    try {
-        // Hacer la solicitud para obtener alertas por IMEI
-        const response = await fetch(`http://3.12.147.103/notificaciones`);
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error del servidor:', errorText);
-            return;
-        }
-        const data = await response.json();
-        console.log(data); // Verifica los datos recibidos
 
-        // Filtrar las nuevas alertas que no están en el estado actual
-        const nuevasAlertas = data.filter(alerta => !alerts.value.some(a => a._id === alerta._id));
-        if (nuevasAlertas.length > 0) {
-            alerts.value = [...alerts.value, ...nuevasAlertas];
-        }
-
-        // Mostrar alerta si hay una alerta en la respuesta
-        if (data.alert) {
-            iziToast.warning({
-                title: 'Alerta',
-                message: data.alert.alertName,
-                position: 'topRight',
-                timeout: 5000 // Mostrar la alerta durante 5 segundos
-            });
-        }
-    } catch (error) {
-        console.error('Error al cargar alertas:', error);
-    }
-};
-
-const cargarNotificaciones = async () => {
-    try {
-        const response = await fetch('http://3.12.147.103/notificaciones');
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error del servidor:', errorText);
-            return;
-        }
-        const data = await response.json();
-        alerts.value = data;
-    } catch (error) {
-        console.error('Error al cargar notificaciones:', error);
-    }
-};
 
 const clearNotifications = async () => {
     try {
@@ -96,8 +51,7 @@ const clearNotifications = async () => {
     }
 };
 onMounted(() => {
-    cargarNotificaciones();
-    cargarAlertas();
+
 
     // Configurar WebSocket para recibir notificaciones en tiempo real
     const ws = new WebSocket('ws://3.12.147.103');

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Notification = require('../models/notification');
-
+const { enviarNotificacion } = require('../server');
 // Ruta para obtener todas las notificaciones
 router.get('/', async (req, res) => {
     try {
@@ -17,6 +17,10 @@ router.post('/', async (req, res) => {
     const notification = new Notification(req.body);
     try {
         const savedNotification = await notification.save();
+        
+        // Enviar la notificación al cliente
+        enviarNotificacion(savedNotification);
+
         res.status(201).json(savedNotification);
     } catch (error) {
         res.status(400).json({ message: 'Error al guardar notificación', error: error.message });
