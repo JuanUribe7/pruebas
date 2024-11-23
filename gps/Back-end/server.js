@@ -146,7 +146,7 @@ app.listen(HTTP_PORT, () => {
     console.log(`Servidor HTTP corriendo en http://localhost:${HTTP_PORT}`);
 });
 
-const wss = new WebSocketServer({ server: app.listen(HTTP_PORT) });
+const wss = new WebSocketServer(3002);
 
 wss.on('connection', (ws) => {
     console.log('Cliente WebSocket conectado');
