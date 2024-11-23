@@ -141,7 +141,7 @@ mongoose.connect('mongodb+srv://lospopulare:gps1234@gps.zgbl7.mongodb.net/proyec
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error de conexión a MongoDB:', err));
 
-    iniciarWatcher();
+
 
 // Rutas
 app.use('/auth', authRoutes);
@@ -158,6 +158,7 @@ const server = app.listen(HTTP_PORT, () => {
 
 // Configuración del servidor WebSocket
 const wss = new WebSocketServer({ server });
+iniciarWatcher(wss);
 
 wss.on('connection', (ws) => {
     console.log('Cliente WebSocket conectado');
