@@ -3,7 +3,7 @@ const router = express.Router();
 const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
 const Alert = require('../models/Alert'); 
 const notification = require('../models/notification');
-const HistoryData = require('../models/historyData'); // Importa HistoryData desde HistoryData.js
+const HistoryData = require('../models/HistoryData');
 const formatearFecha = require('../utils/expresiones')
 
 // Endpoint para obtener todos los dispositivos
@@ -32,7 +32,7 @@ router.post('/save-history', async (req, res) => {
         }
 
         // Crear un nuevo registro de historial
-        const historyData = new HistoryData({
+        const HistoryData = new HistoryData({
             imei,
             fixTime: fixTime,
             lat,
@@ -41,7 +41,7 @@ router.post('/save-history', async (req, res) => {
         });
 
         // Guardar el registro en la base de datos
-        await historyData.save();
+        await HistoryData.save();
 
         res.status(201).json({ message: 'Datos históricos guardados exitosamente.' });
     } catch (error) {
@@ -191,8 +191,8 @@ router.get('/status/:imei', async (req, res) => {
 router.get('/history/:imei', async (req, res) => {
     try {
         const { imei } = req.params;
-        const historyData = await HistoryData.find({ imei }).sort({ fixTime: 1 });
-        res.json(historyData);
+        const HistoryData = await HistoryData.find({ imei }).sort({ fixTime: 1 });
+        res.json(HistoryData);
     } catch (error) {
         console.error('Error al obtener el historial:', error.message);
         res.status(500).json({ error: 'Error al obtener el historial: ' + error.message });

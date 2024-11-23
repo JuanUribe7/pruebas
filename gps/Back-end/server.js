@@ -12,7 +12,7 @@ const Gt06 = require('./gt06');
 const mqtt = require('mqtt');
 const notificacionRoutes = require('./routes/notificaciones');
 const { WebSocketServer } = require('ws');
-const historyData = require('./models/historyData'); // Asegúrate de importar el modelo HistoryData
+const HistoryData = require('./models/HistoryData'); // Asegúrate de importar el modelo HistoryData
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
 const HTTP_PORT = process.env.HTTP_PORT || 80;
@@ -82,7 +82,7 @@ var tcpServer = net.createServer((client) => {
                     gpsTracking: gt06.terminalInfo ? Boolean(gt06.terminalInfo.gpsTracking) : false,
                     relayState: gt06.terminalInfo ? Boolean(gt06.terminalInfo.relayState) : false
                 };
-                const historyData = {
+                const HistoryData = {
                     imei: gt06.imei,
                     lat: gt06.lat,
                     lon: gt06.lon,
@@ -101,7 +101,7 @@ var tcpServer = net.createServer((client) => {
                 // Enviar los datos a la ruta /update-from-gps
                 try {
                     await axios.post(`http://3.12.147.103/devices/update-from-gps`, deviceData);
-                    await axios.post(`http://3.12.147.103/devices/save-history`, historyData);
+                    await axios.post(`http://3.12.147.103/devices/save-history`, HistoryData);
 
                     // Guardar los datos de historial en la colección HistoryData
 

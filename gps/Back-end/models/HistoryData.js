@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
-const historyDataSchema = new mongoose.Schema({
+const HistoryDataSchema = new mongoose.Schema({
     imei: { type: String, required: true },
     fixTime: { type: Date, required: true },
     lat: { type: Number, required: true },
@@ -10,6 +10,6 @@ const historyDataSchema = new mongoose.Schema({
 }, { minimize: false });
 
 // Añadir el campo auto-incremental
-historyDataSchema.plugin(AutoIncrement, { inc_field: 'id', start_seq: 1 });
+HistoryDataSchema.plugin(AutoIncrement, { inc_field: 'id', start_seq: 1 });
 
-module.exports = mongoose.model('historyData', historyDataSchema);
+module.exports = mongoose.model('HistoryData', HistoryDataSchema);
