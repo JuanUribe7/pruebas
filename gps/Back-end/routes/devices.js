@@ -34,7 +34,7 @@ router.post('/save-history', async (req, res) => {
         // Crear un nuevo registro de historial
         const historyData = new HistoryData({
             imei,
-            fixTime: formatearFecha(fixTime),
+            fixTime: fixTime,
             lat,
             lon,
             speed
