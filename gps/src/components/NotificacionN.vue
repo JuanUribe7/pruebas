@@ -39,6 +39,53 @@ const toggleMenu = () => {
 };
 
 
+const cargarAlertas = async () => {
+    try {
+        // Hacer la solicitud para obtener alertas por IMEI
+        const response = await fetch(`http://3.12.147.103/notificaciones`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error del servidor:', errorText);
+            return;
+        }
+        const data = await response.json();
+        console.log(data); // Verifica los datos recibidos
+
+        // Filtrar las nuevas alertas que no están en el estado actual
+        const nuevasAlertas = data.filter(alerta => !alerts.value.some(a => a._id === alerta._id));
+        if (nuevasAlertas.length > 0) {
+            alerts.value = [...alerts.value, ...nuevasAlertas];
+        }
+
+        // Mostrar alerta si hay una alerta en la respuesta
+        if (data.alert) {
+            iziToast.warning({
+                title: 'Alerta',
+                message: data.alert.alertName,
+                position: 'topRight',
+                timeout: 5000 // Mostrar la alerta durante 5 segundos
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar alertas:', error);
+    }
+};
+
+const cargarNotificaciones = async () => {
+    try {
+        const response = await fetch('http://3.12.147.103/notificaciones');
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error del servidor:', errorText);
+            return;
+        }
+        const data = await response.json();
+        alerts.value = data;
+    } catch (error) {
+        console.error('Error al cargar notificaciones:', error);
+    }
+};
+
 
 const clearNotifications = async () => {
     try {
@@ -51,19 +98,30 @@ const clearNotifications = async () => {
     }
 };
 onMounted(() => {
+    cargarNotificaciones();
+    cargarAlertas();
 
 
     // Configurar WebSocket para recibir notificaciones en tiempo real
-    const ws = new WebSocket('ws://3.12.147.103');
+    let ws = new WebSocket('ws://3.12.147.103');
 
     ws.onmessage = (event) => {
-        const notificacion = JSON.parse(event.data);
-        alerts.value.push(notificacion);
-    };
+    const notificacion = JSON.parse(event.data);
 
-    ws.onclose = () => {
-        console.log('WebSocket cerrado');
-    };
+    // Verifica si la notificación ya existe antes de agregarla
+    if (!alerts.value.some(alert => alert._id === notificacion._id)) {
+        alerts.value.push(notificacion);
+    }
+};
+
+ws.onclose = () => {
+    console.log('WebSocket cerrado. Reintentando...');
+    setTimeout(() => {
+        // Reintentar conexión
+        const newWs = new WebSocket('ws://3.12.147.103');
+        ws = newWs;
+    }, 5000);
+};
 
     ws.onerror = (error) => {
         console.error('Error en WebSocket:', error);

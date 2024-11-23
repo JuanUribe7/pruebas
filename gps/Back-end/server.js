@@ -12,7 +12,12 @@ const Gt06 = require('./gt06');
 const mqtt = require('mqtt');
 const notificacionRoutes = require('./routes/notificaciones');
 const { WebSocketServer } = require('ws');
-const Notification = require('./models/notification'); 
+
+const iniciarWatcher = require('./utils/notificationWatcher');
+
+// Iniciar el watcher para notificaciones
+
+
 
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
@@ -136,6 +141,8 @@ mongoose.connect('mongodb+srv://lospopulare:gps1234@gps.zgbl7.mongodb.net/proyec
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error de conexión a MongoDB:', err));
 
+    iniciarWatcher();
+
 // Rutas
 app.use('/auth', authRoutes);
 app.use('/devices', deviceRoutes);
@@ -156,20 +163,19 @@ wss.on('connection', async (ws) => {
     console.log('Cliente WebSocket conectado');
 
     // Función para consultar la base de datos y enviar las notificaciones al cliente
-    const enviarNotificaciones = async () => {
-        try {
-            const notificaciones = await Notification.find();
-            ws.send(JSON.stringify(notificaciones));
-        } catch (error) {
-            console.error('Error al obtener notificaciones:', error);
-        }
+    const enviarNotificaciones = async (notificacion) => {
+        wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(notificacion));
+            }
+        });
     };
 
     // Enviar notificaciones inmediatamente al conectar
     enviarNotificaciones();
 
     // Configurar un intervalo para enviar notificaciones periódicamente
-    const intervalId = setInterval(enviarNotificaciones, 60000); // Cada 60 segundos
+    const intervalId = setInterval(enviarNotificaciones, 3000); // Cada 60 segundos
 
     ws.on('message', (message) => {
         console.log('Mensaje recibido:', message);
