@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
 const Alert = require('../models/Alert'); 
-const notification = require('../models/notification');
+const Notification = require('../models/notification');
 const HistoryData = require('../models/HistoryData');
 const formatearFecha = require('../utils/expresiones')
+const { enviarNotificacion } = require('../server'); // Importa la función enviarNotificacion
 
+// Enviar la alerta al cliente
+enviarNotificacion(HistoryData);
 // Endpoint para obtener todos los dispositivos
 router.get('/', async (req, res) => {
     try {
@@ -87,26 +90,26 @@ router.post('/update-from-gps', async (req, res) => {
 
         if (speed > 2) {
             console.log(`Velocidad de ${speed} km/h detectada, creando alerta...`);
-            const notificacion = new notification({
+            const notificacion = new Notification({
                 imei: imei,
                 alertName: `Exceso de velocidad: ${speed} km/h`,
                 alertTime: formatearFecha(time)
             });
             try {
                 await notificacion.save();
-                console.log(`notificacion de exceso de velocidad guardada para IMEI: ${imei}`);
+                console.log(`Notificación de exceso de velocidad guardada para IMEI: ${imei}`);
             } catch (error) {
-                console.error('Error al guardar la alerta:', error);
+                console.error('Error al guardar la notificación:', error);
             }
             const alert = new Alert({
                 imei: imei,
                 alertName: `Exceso de velocidad: ${speed} km/h`,
                 alertTime: formatearFecha(time)
             });
-        
-            // Enviar la alerta al cliente
 
-        
+            // Enviar la alerta al cliente
+            enviarNotificacion(alert);
+
             try {
                 await alert.save();
                 console.log(`Alerta de exceso de velocidad guardada para IMEI: ${imei}`);

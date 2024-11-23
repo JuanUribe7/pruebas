@@ -41,7 +41,7 @@ const toggleMenu = () => {
 const cargarAlertas = async () => {
     try {
         // Hacer la solicitud para obtener alertas por IMEI
-        const response = await fetch(`http://3.12.147.103/notification`);
+        const response = await fetch(`http://3.12.147.103/notificaciones`);
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error del servidor:', errorText);
@@ -72,7 +72,7 @@ const cargarAlertas = async () => {
 
 const cargarNotificaciones = async () => {
     try {
-        const response = await fetch('http://3.12.147.103/notification');
+        const response = await fetch('http://3.12.147.103/notificaciones');
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error del servidor:', errorText);
@@ -87,7 +87,7 @@ const cargarNotificaciones = async () => {
 
 const clearNotifications = async () => {
     try {
-        await fetch('http://3.12.147.103/notification', {
+        await fetch('http://3.12.147.103/notificaciones', {
             method: 'DELETE'
         });
         alerts.value = [];
@@ -95,8 +95,6 @@ const clearNotifications = async () => {
         console.error('Error al eliminar notificaciones:', error);
     }
 };
-
-// Llama a la función cargarAlertas y cargarNotificaciones cuando el componente se monta
 onMounted(() => {
     cargarNotificaciones();
     cargarAlertas();
@@ -117,6 +115,9 @@ onMounted(() => {
         console.error('Error en WebSocket:', error);
     };
 });
+
+// Llama a la función cargarAlertas y cargarNotificaciones cuando el componente se monta
+
 </script>
 
 <style scoped>
