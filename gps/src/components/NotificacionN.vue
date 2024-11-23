@@ -41,7 +41,7 @@ const toggleMenu = () => {
 const cargarAlertas = async () => {
     try {
         // Hacer la solicitud para obtener alertas por IMEI
-        const response = await fetch(`http://3.12.147.103/devices/alerts`);
+        const response = await fetch(`http://3.12.147.103/notification`);
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error del servidor:', errorText);
@@ -51,18 +51,7 @@ const cargarAlertas = async () => {
         console.log(data); // Verifica los datos recibidos
 
         // Filtrar las nuevas alertas que no están en el estado actual
-        const nuevasAlertas = data.filter(alerta => !alerts.value.some(a => a._id === alerta._id));
-        if (nuevasAlertas.length > 0) {
-            alerts.value = [...alerts.value, ...nuevasAlertas];
-            // Guardar las nuevas alertas en el servidor
-            await fetch('http://3.12.147.103/notifications', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(nuevasAlertas)
-            });
-        }
+
 
         // Mostrar alerta si hay una alerta en la respuesta
         if (data.alert) {
@@ -80,7 +69,7 @@ const cargarAlertas = async () => {
 
 const cargarNotificaciones = async () => {
     try {
-        const response = await fetch('http://3.12.147.103/notifications');
+        const response = await fetch('http://3.12.147.103/notification');
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error del servidor:', errorText);
@@ -95,7 +84,7 @@ const cargarNotificaciones = async () => {
 
 const clearNotifications = async () => {
     try {
-        await fetch('http://3.12.147.103/notifications', {
+        await fetch('http://3.12.147.103/notification', {
             method: 'DELETE'
         });
         alerts.value = [];
