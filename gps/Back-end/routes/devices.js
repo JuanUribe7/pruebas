@@ -5,7 +5,6 @@ const Alert = require('../models/Alert');
 const HistoryData = require('../models/HistoryData'); // Importa HistoryData desde HistoryData.js
 const formatearFecha = require('../utils/expresiones')
 
-
 // Endpoint para obtener todos los dispositivos
 router.get('/', async (req, res) => {
     try {
@@ -16,6 +15,7 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener dispositivos: ' + error.message });
     }
 });
+
 
 router.post('/save-history', async (req, res) => {
     try {
@@ -51,7 +51,6 @@ router.post('/save-history', async (req, res) => {
 
 // Endpoint para actualizar la ubicación del dispositivo desde el GPS
 router.post('/update-from-gps', async (req, res) => {
-    
     try {
         const { imei, Lat, Lon, speed, course, time, ignition, charging, gpsTracking, relayState } = req.body;
 
@@ -84,6 +83,7 @@ router.post('/update-from-gps', async (req, res) => {
             { upsert: true, new: true }
         );
         console.log(`Velocidad actual: ${speed} km/h`);
+
         if (speed > 2) {
             console.log(`Velocidad de ${speed} km/h detectada, creando alerta...`);
             const alert = new Alert({
@@ -91,7 +91,10 @@ router.post('/update-from-gps', async (req, res) => {
                 alertName: `Exceso de velocidad: ${speed} km/h`,
                 alertTime: formatearFecha(time)
             });
+        
+            // Enviar la alerta al cliente
 
+        
             try {
                 await alert.save();
                 console.log(`Alerta de exceso de velocidad guardada para IMEI: ${imei}`);
@@ -183,6 +186,15 @@ router.get('/history/:imei', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener el historial: ' + error.message });
     }
 });
+router.get('/alerts/:imei', async (req, res) => {
+    try {
+        const { imei } = req.params;
+        const alertas = await Alert.find({ imei });
+        res.json(alertas);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener alertas', error: error.message });
+    }
+});
 
 // Endpoint para eliminar un dispositivo
 router.delete('/:id', async (req, res) => {
@@ -199,16 +211,5 @@ router.delete('/:id', async (req, res) => {
         res.status(500).json({ error: 'Error al eliminar dispositivo: ' + error.message });
     }
 });
-
-router.get('/alerts/:imei', async (req, res) => {
-    try {
-        const { imei } = req.params;
-        const alertas = await Alert.find({ imei });
-        res.json(alertas);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener alertas', error: error.message });
-    }
-});
-
 
 module.exports = router;

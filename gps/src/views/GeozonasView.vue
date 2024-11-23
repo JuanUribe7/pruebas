@@ -1,52 +1,10 @@
 <template>
   <section class="home">
     <div class="overlay"></div>
-    <div class="navar">
-      <div class="text">
-        <h1 class="titulo">{{ displayedText }}</h1>
-      </div>
-
-      <div class="actions">
-        <router-link to="/reporte2">
-          <button class="notification-btn">
-            <i class='bx bx-bell'></i>
-            <span class="notification-indicator"></span>
-          </button>
-        </router-link>
-
-        
-
-        <button class="generate-route-btn" @click="generateRoute">
-          Generar Ruta
-        </button>
-
-        <div class="dropdown">
-          <button class="dropbtn" @click="toggleDropdown">
-            <i class='bx bx-cog confi'></i> Configuración
-            <i class='bx bx-chevron-down'></i>
-          </button>
-          <div class="dropdown-content" :class="{ 'show': dropdownOpen }">
-            <a href="#" class="dropdown-item">
-              <i class='bx bx-user-circle'></i>
-              <span>Perfil</span>
-            </a>
-            <a href="#" class="dropdown-item">
-              <i class='bx bx-lock-alt'></i>
-              <span>Contraseña</span>
-            </a>
-            <a href="#" class="dropdown-item">
-              <i class='bx bx-user-x'></i>
-              <span>Privacidad</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <NavBar />
     <div class="hone2">
       <h1>Geozona</h1>
     </div>
-
     <div class="tituloo">
       <div class="hone">
         <h1>Crear Geozonas</h1>
@@ -72,21 +30,35 @@
 
       <div id="map" class="map-container"></div>
     </div>
+
+    <!-- Modal para seleccionar dispositivo -->
+    <div v-if="showDeviceModal" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="closeModal">&times;</span>
+        <h2>Seleccionar Dispositivo</h2>
+        <ul class="device-list-modal">
+          <li v-for="device in devices" :key="device.id" @click="toggleDeviceSelection(device)" class="device-item">
+            <input type="checkbox" :checked="selectedDevices.includes(device)" />
+            {{ device.deviceName }}
+          </li>
+        </ul>
+        <button @click="confirmCreateGeozona" class="create-button">Crear Geozona</button>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import NavBar from '../components/NavBar.vue';
 import * as L from 'leaflet';
 import Swal from 'sweetalert2';
 import 'leaflet/dist/leaflet.css';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
-
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 
@@ -106,6 +78,10 @@ let isDeleting = false;
 let typingInterval;
 let routingControl = null;
 let deviceMarker = null;
+let coordinates = null;
+
+const showDeviceModal = ref(false);
+const selectedDevices = ref([]);
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -168,54 +144,29 @@ const initMap = () => {
 
     map.value.on('pm:create', (e) => {
       const layer = e.layer;
+      drawnItems.value.addLayer(layer);
 
-      Swal.fire({
-        title: 'Confirmar Creación de Geozona',
-        text: `¿Desea crear una geozona?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Crear',
-        cancelButtonText: 'Cancelar',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          let coordinates;
-          if (layer instanceof L.Circle) {
-            coordinates = {
-              center: layer.getLatLng(),
-              radius: layer.getRadius()
-            };
+      console.log('Dispositivos disponibles:', devices.value);
 
-            if (coordinates.radius <= 0) {
-              console.error('Error: El radio de la circunferencia debe ser mayor que cero.');
-              return;
-            }
-
-            console.log('Círculo creado - Centro:', coordinates.center, 'Radio:', coordinates.radius);
-          } else if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
-            coordinates = layer.getLatLngs();
-            console.log('Coordenadas de la figura creada:', coordinates);
-          } else {
-            console.error('Tipo de capa no soportado:', layer);
-          }
-
-          drawnItems.value.addLayer(layer);
-          storeShape(layer);
-
-          Swal.fire({
-            title: 'Geozona Creada',
-            icon: 'success',
-            confirmButtonText: 'Cerrar',
-          });
-        } else {
-          map.value.removeLayer(layer);
-          Swal.fire({
-            title: 'Cancelado',
-            text: 'La creación de la geozona ha sido cancelada.',
-            icon: 'info',
-            confirmButtonText: 'Cerrar',
-          });
+      const inputOptions = devices.value.reduce((options, device) => {
+        if (device.id && device.deviceName) {
+          options[device.id] = device.deviceName;
         }
-      });
+        return options;
+      }, {});
+      openModal();
+
+     
+      if (layer instanceof L.Circle) {
+        coordinates = {
+          center: layer.getLatLng(),
+          radius: layer.getRadius()
+        };
+        console.log('Circunferencia creada - Centro:', coordinates.center, 'Radio:', coordinates.radius);
+      } else {
+        coordinates = layer.getLatLngs();
+        console.log('Coordenadas de la geozona creada:', coordinates);
+      }
     });
 
     map.value.on('pm:remove', (e) => {
@@ -224,14 +175,11 @@ const initMap = () => {
   }
 };
 
-const storeShape = (layer) => {
-  if (!selectedDevice.value) return;
-
-  if (!deviceShapes.value[selectedDevice.value.id]) {
-    deviceShapes.value[selectedDevice.value.id] = [];
+const storeShape = (layer, deviceId) => {
+  if (!deviceShapes.value[deviceId]) {
+    deviceShapes.value[deviceId] = [];
   }
-
-  deviceShapes.value[selectedDevice.value.id].push(layer);
+  deviceShapes.value[deviceId].push(layer);
 };
 
 const showDeviceOnMap = (device) => {
@@ -257,15 +205,24 @@ const showDeviceOnMap = (device) => {
 };
 
 const selectDevice = (device) => {
+  if (!coordinates) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Geozona no creada',
+      text: 'Primero debes crear la geozona antes de seleccionar un dispositivo.',
+    });
+    return;
+  }
+
   selectedDevice.value = device;
 
   if (deviceShapes.value[device.id]) {
     deviceShapes.value[device.id].forEach(layer => {
       drawnItems.value.addLayer(layer);
     });
+  } else {
+    showDeviceOnMap(device);
   }
-
-  showDeviceOnMap(device);
 };
 
 const deleteLastShape = () => {
@@ -301,9 +258,10 @@ const deleteLastShape = () => {
 
 const filterResults = () => {
   const query = searchQuery.value.toLowerCase();
-  filteredResults.value = devices.value.filter(item =>
-    item.deviceName.toLowerCase().includes(query)
-  );
+  filteredResults.value = devices.value.filter(item => {
+    const hasGeozona = deviceShapes.value[item.id] && deviceShapes.value[item.id].length > 0;
+    return !hasGeozona && item.deviceName.toLowerCase().includes(query);
+  });
 };
 
 const cargarDispositivos = async () => {
@@ -314,6 +272,7 @@ const cargarDispositivos = async () => {
     }
     const data = await response.json();
     devices.value = data;
+    console.log('Dispositivos cargados:', devices.value);
     filteredResults.value = devices.value;
   } catch (error) {
     console.error('Error al cargar dispositivos:', error);
@@ -368,6 +327,60 @@ const generateRoute = () => {
       container.style.maxHeight = '400px';
       container.style.overflowY = 'auto';
       container.style.scrollbarColor = 'var(--text-color) var(--sidebar-color)';
+    }
+  });
+};
+
+const openModal = () => {
+  showDeviceModal.value = true;
+};
+
+const closeModal = () => {
+  showDeviceModal.value = false;
+};
+
+const toggleDeviceSelection = (device) => {
+  const index = selectedDevices.value.indexOf(device);
+  if (index > -1) {
+    // Si el dispositivo ya está seleccionado, lo eliminamos
+    selectedDevices.value.splice(index, 1);
+  } else {
+    // Si no está seleccionado, lo agregamos
+    selectedDevices.value.push(device);
+  }
+};
+
+const confirmCreateGeozona = () => {
+  if (selectedDevices.value.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Sin selección',
+      text: 'Por favor, selecciona al menos un dispositivo para crear la geozona.',
+    });
+    return;
+  }
+
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "¿Deseas crear la geozona para los dispositivos seleccionados?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, crear',
+    cancelButtonText: 'No, cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      console.log('Creando geozona para los dispositivos:', selectedDevices.value);
+      
+      Swal.fire({
+        title: 'Geozona creada',
+        icon: 'success'
+      }).then(() => {
+        closeModal();
+      });
+    } else {
+      console.log('Creación de geozona cancelada.');
+      drawnItems.value.clearLayers();
+      coordinates = null;
     }
   });
 };
@@ -720,6 +733,93 @@ onUnmounted(() => {
 
 .dark-mode-table tr:nth-child(odd) {
   background-color: #666;
+}
+
+.modal {
+  display: flex;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  margin: 15% auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 500px;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+}
+
+.device-list-modal {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.device-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin: 5px 0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.device-item:hover {
+  background-color: #f0f0f0;
+}
+
+.create-button {
+  background-color: #4CAF50; /* Verde */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.create-button:hover {
+  background-color: #45a049; /* Verde más oscuro */
 }
 
 </style>
