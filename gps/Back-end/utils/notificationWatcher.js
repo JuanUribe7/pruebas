@@ -1,5 +1,5 @@
-const Notification = require('./models/notification'); // Modelo Mongoose
-const { enviarNotificacion } = require('./server'); // Importar la función para enviar notificaciones
+const Notification = require('../models/notification'); // Modelo Mongoose
+const { enviarNotificacion } = require('../server'); // Importar la función para enviar notificaciones
 
 // Escuchar cambios en la colección Notification
 const iniciarWatcher = () => {
