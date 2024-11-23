@@ -5,10 +5,7 @@ const Alert = require('../models/Alert');
 const Notification = require('../models/notification');
 const HistoryData = require('../models/HistoryData');
 const formatearFecha = require('../utils/expresiones')
-const { enviarNotificacion } = require('../server'); // Importa la función enviarNotificacion
 
-// Enviar la alerta al cliente
-enviarNotificacion(HistoryData);
 // Endpoint para obtener todos los dispositivos
 router.get('/', async (req, res) => {
     try {
@@ -108,7 +105,7 @@ router.post('/update-from-gps', async (req, res) => {
             });
 
             // Enviar la alerta al cliente
-            enviarNotificacion(alert);
+   
 
             try {
                 await alert.save();
