@@ -104,8 +104,7 @@ var tcpServer = net.createServer((client) => {
                     await axios.post(`http://3.12.147.103/devices/save-history`, historyData);
 
                     // Guardar los datos de historial en la colección HistoryData
-                    const newHistoryData = new HistoryData(historyData);
-                    await newHistoryData.save();
+
 
                     console.log(`Datos enviados a /update-from-gps para IMEI: ${gt06.imei}`);
                 } catch (error) {
