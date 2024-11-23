@@ -163,7 +163,7 @@ wss.on('connection', async (ws) => {
     console.log('Cliente WebSocket conectado');
 
     // Función para consultar la base de datos y enviar las notificaciones al cliente
-    const enviarNotificaciones = async (notificacion) => {
+    const enviarNotificacion = async (notificacion) => {
         wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(notificacion));
@@ -172,10 +172,10 @@ wss.on('connection', async (ws) => {
     };
 
     // Enviar notificaciones inmediatamente al conectar
-    enviarNotificaciones();
+    enviarNotificacion();
 
     // Configurar un intervalo para enviar notificaciones periódicamente
-    const intervalId = setInterval(enviarNotificaciones, 3000); // Cada 60 segundos
+    const intervalId = setInterval(enviarNotificacion, 3000); // Cada 60 segundos
 
     ws.on('message', (message) => {
         console.log('Mensaje recibido:', message);
