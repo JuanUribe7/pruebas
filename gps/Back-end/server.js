@@ -12,6 +12,7 @@ const Gt06 = require('./gt06');
 const mqtt = require('mqtt');
 const notificacionRoutes = require('./routes/notificaciones');
 const { WebSocketServer } = require('ws');
+const Notification = require('./models/notification'); 
 
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
