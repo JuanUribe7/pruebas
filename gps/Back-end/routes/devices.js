@@ -32,7 +32,7 @@ router.post('/save-history', async (req, res) => {
         }
 
         // Crear un nuevo registro de historial
-        const HistoryData = new HistoryData({
+        const historyData = new HistoryData({
             imei,
             fixTime: fixTime,
             lat,
@@ -41,7 +41,7 @@ router.post('/save-history', async (req, res) => {
         });
 
         // Guardar el registro en la base de datos
-        await HistoryData.save();
+        await historyData.save();
 
         res.status(201).json({ message: 'Datos históricos guardados exitosamente.' });
     } catch (error) {

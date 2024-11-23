@@ -82,7 +82,7 @@ var tcpServer = net.createServer((client) => {
                     gpsTracking: gt06.terminalInfo ? Boolean(gt06.terminalInfo.gpsTracking) : false,
                     relayState: gt06.terminalInfo ? Boolean(gt06.terminalInfo.relayState) : false
                 };
-                const HistoryData = {
+                const historyData = {
                     imei: gt06.imei,
                     lat: gt06.lat,
                     lon: gt06.lon,
@@ -101,10 +101,11 @@ var tcpServer = net.createServer((client) => {
                 // Enviar los datos a la ruta /update-from-gps
                 try {
                     await axios.post(`http://3.12.147.103/devices/update-from-gps`, deviceData);
-                    await axios.post(`http://3.12.147.103/devices/save-history`, HistoryData);
+                    await axios.post(`http://3.12.147.103/devices/save-history`, historyData);
 
                     // Guardar los datos de historial en la colección HistoryData
-
+                    const newHistoryData = new HistoryData(historyData);
+                    await newHistoryData.save();
 
                     console.log(`Datos enviados a /update-from-gps para IMEI: ${gt06.imei}`);
                 } catch (error) {
