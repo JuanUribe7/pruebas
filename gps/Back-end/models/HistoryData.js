@@ -12,4 +12,4 @@ const historyDataSchema = new mongoose.Schema({
 // Añadir el campo auto-incremental
 historyDataSchema.plugin(AutoIncrement, { inc_field: 'id', start_seq: 1 });
 
-module.exports = mongoose.model('HistoryData', historyDataSchema);
+module.exports = mongoose.model('historyData', historyDataSchema);

@@ -12,7 +12,7 @@ const Gt06 = require('./gt06');
 const mqtt = require('mqtt');
 const notificacionRoutes = require('./routes/notificaciones');
 const { WebSocketServer } = require('ws');
-const HistoryData = require('./models/HistoryData'); // Asegúrate de importar el modelo HistoryData
+const historyData = require('./models/historyData'); // Asegúrate de importar el modelo HistoryData
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
 const HTTP_PORT = process.env.HTTP_PORT || 80;
