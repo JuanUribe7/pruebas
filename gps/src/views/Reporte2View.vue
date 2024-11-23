@@ -1,62 +1,13 @@
 <template>
     <section class="home">
         <div class="overlay"></div>
-        <div class="navar">
-            <div class="text">
-                <h1 class="titulo">{{ displayedText }}</h1>
-            </div>
-
-            <div class="actions">
-                <button class="notification-btn">
-                    <i class='bx bx-bell'></i>
-                    <span class="notification-indicator"></span>
-                </button>
-
-                <div class="dropdown">
-                    <button class="dropbtn" @click="toggleDropdown">
-                        <i class='bx bx-cog confi'></i> Configuración
-                        <i class='bx bx-chevron-down'></i>
-                    </button>
-                    <div class="dropdown-content" :class="{ 'show': dropdownOpen }">
-                        <a href="#" class="dropdown-item">
-                            <i class='bx bx-user-circle'></i>
-                            <span>Perfil</span>
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            <i class='bx bx-lock-alt'></i>
-                            <span>Contraseña</span>
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            <i class='bx bx-user-x'></i>
-                            <span>Privacidad</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <NavBar />
         <div class="report">
             <div class="titu">
                 <h1><i class='bx bxs-report icoon'></i> Reporte del Dispositivo</h1>
             </div>
-
-            <div class="submenu">
-                <div class="select">
-                    <input type="text" readonly
-                        :value="selectedDevice ? selectedDevice.deviceName : 'Seleccione un dispositivo'"
-                        @click="toggleDeviceDropdown" />
-                    <i class="arrow" @click="toggleDeviceDropdown">&#9660;</i>
-                </div>
-                <ul v-if="deviceDropdownOpen" class="dropdown-menu">
-                    <li v-for="device in devices" :key="device.imei" @click="selectDevice(device)">
-                        <i class='bx bxs-bus iconn'></i>
-                        <span>{{ device.deviceName }}</span>
-                    </li>
-                </ul>
-            </div>
             <div class="search-container">
                 <div class="group">
-
                     <button class="button" type="button" @click="downloadReport">
                         <span class="button__text">Download</span>
                         <span class="button__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35"
@@ -73,9 +24,19 @@
                             </svg></span>
                     </button>
                 </div>
+                <div class="select">
+                    <input type="text" readonly
+                        :value="selectedDevice ? selectedDevice.deviceName : 'Seleccione un dispositivo'"
+                        @click="toggleDeviceDropdown" />
+                    <i class="arrow" @click="toggleDeviceDropdown">&#9660;</i>
+                </div>
+                <ul v-if="deviceDropdownOpen" class="dropdown-menu">
+                    <li v-for="device in devices" :key="device.imei" @click="selectDevice(device)">
+                        <i class='bx bxs-bus iconn'></i>
+                        <span>{{ device.deviceName }}</span>
+                    </li>
+                </ul>
             </div>
-
-
             <div class="tabla">
                 <table>
                     <thead>
@@ -107,6 +68,8 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import axios from 'axios'
 import imgPath from '../assets/LP.png'; // Importa la imagen aquí
+import iziToast from 'izitoast';
+import NavBar from '../components/NavBar.vue';
 
 // Variables reactivas
 const devices = ref([]);
@@ -253,6 +216,7 @@ const cargarAlertas = async (imei) => {
         return;
     }
     try {
+        // Hacer la solicitud para obtener alertas por IMEI
         const response = await fetch(`http://3.12.147.103/devices/alerts/${imei}`);
         if (!response.ok) {
             const errorText = await response.text();
@@ -262,6 +226,16 @@ const cargarAlertas = async (imei) => {
         const data = await response.json();
         console.log(data); // Verifica los datos recibidos
         alerts.value = data;
+
+        // Mostrar alerta si hay una alerta en la respuesta
+        if (data.alert) {
+            iziToast.warning({
+                title: 'Alerta',
+                message: data.alert.alertName,
+                position: 'topRight',
+                timeout: 5000 // Mostrar la alerta durante 5 segundos
+            });
+        }
     } catch (error) {
         console.error('Error al cargar alertas:', error);
         alerts.value = [];
@@ -291,7 +265,7 @@ onUnmounted(() => {
     position: relative;
     display: flex;
     align-items: center;
-    width: 100%;
+    width: 30%;
 }
 
 .select input {
@@ -328,8 +302,8 @@ onUnmounted(() => {
 .dropdown-menu {
     position: absolute;
     top: 100%;
-    left: 0;
-    width: 100%;
+    left: 87%;
+    width: 10%;
     background-color: var(--sidebar-color);
     border: 2px solid var(--text-colar);
     border-top: none;
@@ -536,6 +510,8 @@ onUnmounted(() => {
 .search-container {
     margin: 20px 0px 0px 70px;
     position: relative;
+    display: flex;
+    width: 90%;
 
 }
 
