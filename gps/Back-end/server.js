@@ -12,9 +12,10 @@ const Gt06 = require('./gt06');
 const mqtt = require('mqtt');
 const notificacionRoutes = require('./routes/notificaciones');
 const { WebSocketServer } = require('ws');
+const HistoryData = require('./models/HistoryData'); // Asegúrate de importar el modelo HistoryData
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
-const HTTP_PORT = process.env.HTTP_PORT || 80; // Cambia el puerto a 8080
+const HTTP_PORT = process.env.HTTP_PORT || 80;
 const rootTopic = process.env.MQTT_ROOT_TOPIC || 'gt06';
 const brokerUrl = process.env.MQTT_BROKER_URL || '11ec3ffa829840c785105a23a3994db1.s1.eu.hivemq.cloud';
 const brokerPort = process.env.MQTT_BROKER_PORT || 1883;
@@ -101,6 +102,10 @@ var tcpServer = net.createServer((client) => {
                 try {
                     await axios.post(`http://3.12.147.103/devices/update-from-gps`, deviceData);
                     await axios.post(`http://3.12.147.103/devices/save-history`, historyData);
+
+                    // Guardar los datos de historial en la colección HistoryData
+                    const newHistoryData = new HistoryData(historyData);
+                    await newHistoryData.save();
 
                     console.log(`Datos enviados a /update-from-gps para IMEI: ${gt06.imei}`);
                 } catch (error) {
