@@ -1,9 +1,10 @@
+// models/HistoryData.js
 const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const historyDataSchema = new mongoose.Schema({
     imei: { type: String, required: true },
-    fixTime: { type: Date, required: true },
+    fixTime: { type: String, required: true },
     lat: { type: Number, required: true },
     lon: { type: Number, required: true },
     speed: { type: Number, required: false }

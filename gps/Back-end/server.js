@@ -12,7 +12,7 @@ const Gt06 = require('./gt06');
 const mqtt = require('mqtt');
 const notificacionRoutes = require('./routes/notificaciones');
 const { WebSocketServer } = require('ws');
-const HistoryData = require('./models/HistoryData'); // Asegúrate de importar el modelo HistoryData
+
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
 const HTTP_PORT = process.env.HTTP_PORT || 80;
@@ -104,8 +104,7 @@ var tcpServer = net.createServer((client) => {
                     await axios.post(`http://3.12.147.103/devices/save-history`, historyData);
 
                     // Guardar los datos de historial en la colección HistoryData
-                    const newHistoryData = new HistoryData(historyData);
-                    await newHistoryData.save();
+                
 
                     console.log(`Datos enviados a /update-from-gps para IMEI: ${gt06.imei}`);
                 } catch (error) {
