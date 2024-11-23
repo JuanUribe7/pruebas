@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Device, DeviceStatus} = require('../models/Device'); // Asegúrate de importar DeviceStatus
 const Alert = require('../models/Alert'); 
+const Notification = require('../models/Notification');
 const HistoryData = require('../models/HistoryData'); // Importa HistoryData desde HistoryData.js
 const formatearFecha = require('../utils/expresiones')
 
@@ -86,6 +87,16 @@ router.post('/update-from-gps', async (req, res) => {
 
         if (speed > 2) {
             console.log(`Velocidad de ${speed} km/h detectada, creando alerta...`);
+            const notificacion = new Notification({
+                alertName: `Exceso de velocidad: ${speed} km/h`,
+                alertTime: formatearFecha(time)
+            });
+            try {
+                await notificacion.save();
+                console.log(`notificacion de exceso de velocidad guardada para IMEI: ${imei}`);
+            } catch (error) {
+                console.error('Error al guardar la alerta:', error);
+            }
             const alert = new Alert({
                 imei: imei,
                 alertName: `Exceso de velocidad: ${speed} km/h`,

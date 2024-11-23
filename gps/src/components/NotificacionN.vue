@@ -49,7 +49,20 @@ const cargarAlertas = async () => {
         }
         const data = await response.json();
         console.log(data); // Verifica los datos recibidos
-        alerts.value = data;
+
+        // Filtrar las nuevas alertas que no están en el estado actual
+        const nuevasAlertas = data.filter(alerta => !alerts.value.some(a => a._id === alerta._id));
+        if (nuevasAlertas.length > 0) {
+            alerts.value = [...alerts.value, ...nuevasAlertas];
+            // Guardar las nuevas alertas en el servidor
+            await fetch('http://3.12.147.103/notifications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(nuevasAlertas)
+            });
+        }
 
         // Mostrar alerta si hay una alerta en la respuesta
         if (data.alert) {
@@ -62,16 +75,38 @@ const cargarAlertas = async () => {
         }
     } catch (error) {
         console.error('Error al cargar alertas:', error);
-        alerts.value = [];
     }
 };
 
-const clearNotifications = () => {
-    alerts.value = [];
+const cargarNotificaciones = async () => {
+    try {
+        const response = await fetch('http://3.12.147.103/notifications');
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error del servidor:', errorText);
+            return;
+        }
+        const data = await response.json();
+        alerts.value = data;
+    } catch (error) {
+        console.error('Error al cargar notificaciones:', error);
+    }
 };
 
-// Llama a la función cargarAlertas cuando el componente se monta
+const clearNotifications = async () => {
+    try {
+        await fetch('http://3.12.147.103/notifications', {
+            method: 'DELETE'
+        });
+        alerts.value = [];
+    } catch (error) {
+        console.error('Error al eliminar notificaciones:', error);
+    }
+};
+
+// Llama a la función cargarAlertas y cargarNotificaciones cuando el componente se monta
 onMounted(() => {
+    cargarNotificaciones();
     cargarAlertas();
 });
 </script>
@@ -79,15 +114,15 @@ onMounted(() => {
 <style scoped>
 .notification-container {
     position: fixed;
-    position: absolute;
-    top: 48%;
-    left: 80%;
-    transform: translate(-50%, -50%);
+    top: 10%; /* Ajusta la posición superior según sea necesario */
+    right: 10%; /* Ajusta la posición derecha según sea necesario */
     z-index: 100;
     background-color: var(--body-color);
-    height: 600px;
+    height: auto; /* Ajusta la altura automáticamente según el contenido */
     width: 400px;
     border-radius: 20px;
+    max-height: 80vh; /* Limita la altura máxima al 80% de la altura de la ventana */
+    overflow-y: auto; /* Habilita el desplazamiento si el contenido excede la altura máxima */
 }
 
 .notification-header {
@@ -125,7 +160,6 @@ onMounted(() => {
     z-index: 101;
     width: 50%;
     border-top-right-radius: 0px;
-
 }
 
 .menu-modal svg {
@@ -165,9 +199,12 @@ onMounted(() => {
     font-size: 17px;
 }
 
+.notification-list {
+    max-height: 300px; /* Ajusta la altura máxima para permitir el desplazamiento */
+    overflow-y: auto; /* Habilita el desplazamiento vertical */
+}
+
 .notification-list li {
-    max-height: 200px;
-    overflow-y: auto;
     padding: 10px;
     margin: 10px;
     height: 50px;
@@ -175,8 +212,9 @@ onMounted(() => {
     background: rgb(233,233,235);
     background: linear-gradient(90deg, rgba(233,233,235,1) 0%, rgba(255,218,218,1) 35%, rgba(219,249,255,1) 100%);
 }
+
 .notification-list li a {
     text-decoration: none;
-    color: var(--text-color);
+    color: var(--text-color); /* Asegúrate de que el color del texto sea visible */
 }
 </style>
