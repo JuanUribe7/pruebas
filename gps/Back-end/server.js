@@ -14,7 +14,7 @@ const notificacionRoutes = require('./routes/notificaciones');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.GT06_SERVER_PORT || 4000;
-const HTTP_PORT = process.env.HTTP_PORT || 80; // Cambia el puerto a 8080
+const HTTP_PORT = process.env.HTTP_PORT || 443; // Cambia el puerto a 8080
 const rootTopic = process.env.MQTT_ROOT_TOPIC || 'gt06';
 const brokerUrl = process.env.MQTT_BROKER_URL || '11ec3ffa829840c785105a23a3994db1.s1.eu.hivemq.cloud';
 const brokerPort = process.env.MQTT_BROKER_PORT || 1883;
