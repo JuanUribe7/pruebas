@@ -6,4 +6,4 @@ const notificationSchema = new mongoose.Schema({
     alertTime: { type: String, required: true }
 }, { minimize: false });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.model('notification', notificationSchema);
