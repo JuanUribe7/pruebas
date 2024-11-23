@@ -11,6 +11,7 @@ const deviceRoutes = require('./routes/devices');
 const Gt06 = require('./gt06'); // Asegúrate de tener el módulo Gt06
 const mqtt = require('mqtt');
 const notificationRoutes = require('./routes/notificaciones');
+const { WebSocketServer } = require('ws');
 
 
 
@@ -144,3 +145,27 @@ app.get('*', (req, res) => {
 app.listen(HTTP_PORT, () => {
     console.log(`Servidor HTTP corriendo en http://localhost:${HTTP_PORT}`);
 });
+
+const wss = new WebSocketServer({ server: app.listen(HTTP_PORT) });
+
+wss.on('connection', (ws) => {
+    console.log('Cliente WebSocket conectado');
+
+    ws.on('message', (message) => {
+        console.log('Mensaje recibido:', message);
+    });
+
+    ws.on('close', () => {
+        console.log('Cliente WebSocket desconectado');
+    });
+});
+
+// Función para enviar notificaciones a todos los clientes WebSocket conectados
+const enviarNotificacion = (notificacion) => {
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(notificacion));
+        }
+    });
+};
+module.exports = { enviarNotificacion };

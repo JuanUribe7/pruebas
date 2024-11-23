@@ -51,7 +51,10 @@ const cargarAlertas = async () => {
         console.log(data); // Verifica los datos recibidos
 
         // Filtrar las nuevas alertas que no están en el estado actual
-
+        const nuevasAlertas = data.filter(alerta => !alerts.value.some(a => a._id === alerta._id));
+        if (nuevasAlertas.length > 0) {
+            alerts.value = [...alerts.value, ...nuevasAlertas];
+        }
 
         // Mostrar alerta si hay una alerta en la respuesta
         if (data.alert) {
@@ -97,6 +100,22 @@ const clearNotifications = async () => {
 onMounted(() => {
     cargarNotificaciones();
     cargarAlertas();
+
+    // Configurar WebSocket para recibir notificaciones en tiempo real
+    const ws = new WebSocket('ws://3.12.147.103');
+
+    ws.onmessage = (event) => {
+        const notificacion = JSON.parse(event.data);
+        alerts.value.push(notificacion);
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket cerrado');
+    };
+
+    ws.onerror = (error) => {
+        console.error('Error en WebSocket:', error);
+    };
 });
 </script>
 
